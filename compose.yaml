@@ -21,4 +21,17 @@ services:
           action: rebuild
         - path: compose.yaml
           action: rebuild
-        
+  db_service:
+    image: postgres:17.4
+    environment:
+      - POSTGRES_USER=value
+      - POSTGRES_PASSWORD=pw
+      - POSTGRES_DB=db
+    volumes:
+      - timescaledb_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    expose:
+      - 5432
+volumes:
+  timescaledb_data:
