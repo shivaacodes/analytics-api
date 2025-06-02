@@ -6,3 +6,4 @@ pydantic
 sqlalchemy
 timescaledb
 requests
+python-decouple

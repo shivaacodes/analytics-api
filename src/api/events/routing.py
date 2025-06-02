@@ -1,3 +1,4 @@
+import os
 from fastapi import APIRouter
 from .schemas import (
     EventSchema, 
@@ -7,11 +8,13 @@ from .schemas import (
 )
 
 router = APIRouter()
+from ..db.config import DATABASE_URL
 
 #Get aLL Evnets
 @router.get("/", response_model=EventListSchema)
 def read_events() -> EventListSchema:
     events = [EventSchema(id=i) for i in [1, 2, 3, 4, 5]]
+    print(os.environ.get("DATABASE_URL"),DATABASE_URL) # Both works in my system 
     return EventListSchema(results=events, count=len(events))
 
 #Get a specific event
