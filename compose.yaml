@@ -4,11 +4,11 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.web
-    environment:
-      - PORT=8002
-      - DATABASE_URL=postgresql+psycopg://time-user:time-pw@hostvalue:5432/timescaledb
+    # environment:
+    #   - PORT=8002
+    #   - DATABASE_URL=postgresql+psycopg://time-user:time-pw@hostvalue:5432/timescaledb
     env_file:
-      - .env
+      - .env.compose
     ports:
       - "8002:8002"
     command: uvicorn main:app --host 0.0.0.0 --port 8002 --reload
