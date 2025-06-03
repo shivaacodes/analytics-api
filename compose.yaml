@@ -13,7 +13,12 @@ services:
       - "8002:8002"
     command: uvicorn main:app --host 0.0.0.0 --port 8002 --reload
     volumes:
-      - ./src:/app:rw
+      - ./src:/code:rw
+    depends_on:
+      db_service:
+        condition: service_healthy
+    environment:
+      - PYTHONPATH=/code
     develop:
       watch:
         - path: Dockerfile
@@ -26,15 +31,22 @@ services:
   # URL: postgresql+psycopg://time-user:time-pw@hostvalue:5432/timescaledb
   db_service:
     image: timescale/timescaledb:latest-pg17
-    environment:
-      - POSTGRES_USER=time-user
-      - POSTGRES_PASSWORD=time-pw
-      - POSTGRES_DB=timescaledb
+    env_file:
+      - .env.compose
     volumes:
       - timescaledb_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     expose:
       - 5432
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U time-user -d timescaledb"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    environment:
+      - POSTGRES_USER=time-user
+      - POSTGRES_PASSWORD=time-pw
+      - POSTGRES_DB=timescaledb
 volumes:
   timescaledb_data:
