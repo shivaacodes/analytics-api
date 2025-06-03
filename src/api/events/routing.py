@@ -1,7 +1,6 @@
 from api.db.session import get_session
 from fastapi import APIRouter,HTTPException,Depends
-from sqlmodel import Session,select #orm
-
+from sqlmodel import Session,select,desc#orm
 from .models import (
     EventModel, 
     EventListSchema, 
@@ -14,17 +13,18 @@ router = APIRouter()
 #Get All Evnets: GET method
 @router.get("/", response_model=EventListSchema)
 def read_events(session:Session=Depends(get_session)):
-    query=select(EventModel)
+    query=select(EventModel).order_by(desc(EventModel.id)).limit(95)
     results = list(session.exec(query).all())
     return EventListSchema(results=results, count=len(results))
 
 #Get a specific event GET /api/events/8
 @router.get("/{event_id}",response_model=EventModel)
 def get_event(event_id:int,session:Session=Depends(get_session)):
-    event=session.get(EventModel,event_id)
-    if not event:
+    query=select(EventModel).where(EventModel.id==event_id)
+    result=session.exec(query).first()
+    if not result:
         raise HTTPException(status_code=404,detail="Event not found")
-    return event
+    return result
     
 
 #Create a New Event : POST /api/events
@@ -42,15 +42,15 @@ def create_event(payload:EventCreateSchema,session: Session=Depends(get_session)
 # Update this id :/api/events/12
 @router.put("/{event_id}",response_model=EventModel)
 def update_event(event_id:int, payload:EventUpdateSchema,session:Session=Depends(get_session)):
-    event=session.get(EventModel,event_id)
-
-    if not event:
+    query=select(EventModel).where(EventModel.id==event_id)
+    obj=session.exec(query).first()
+    if not obj:
         raise HTTPException(status_code=404,detail="Event not found")
     
     for key,value in payload.model_dump(exclude_unset=True).items():
-        setattr(event,key,value)
+        setattr(obj,key,value)
 
-    session.add(event)
+    session.add(obj)
     session.commit()
-    session.refresh(event)
-    return event
+    session.refresh(obj)
+    return obj
