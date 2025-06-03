@@ -5,7 +5,8 @@ from .models import (
     EventModel, 
     EventListSchema, 
     EventCreateSchema,
-    EventUpdateSchema
+    EventUpdateSchema,
+    get_utc_now
 )
 
 router = APIRouter()
@@ -49,7 +50,8 @@ def update_event(event_id:int, payload:EventUpdateSchema,session:Session=Depends
     
     for key,value in payload.model_dump(exclude_unset=True).items():
         setattr(obj,key,value)
-
+    
+    obj.updated_at=get_utc_now()
     session.add(obj)
     session.commit()
     session.refresh(obj)
