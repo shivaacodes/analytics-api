@@ -1,25 +1,23 @@
 from typing import Union
 from contextlib import asynccontextmanager
-import time
+from api.db.session import init_db
 
 from fastapi import FastAPI
-from api.db.session import init_db, engine
+from api.db.session import engine
 from sqlmodel import SQLModel
 from api.events import router as event_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # before app startup
-    print("Starting database initialization...")
+    print("🔥 Starting database initialization...")
     try:
-        # Create all tables
-        SQLModel.metadata.create_all(engine)
-        print("Database tables created successfully")
+        init_db()  # ✅ This includes hypertable creation!
+        print("✅ Database and hypertable setup complete")
     except Exception as e:
-        print(f"Error creating database tables: {str(e)}")
+        print(f"❌ Error during DB init: {e}")
         raise
     yield
-    # cleanup
+    print("👋 Application shutdown...")
 
 app = FastAPI(lifespan=lifespan)
 app.include_router(event_router, prefix='/api/events')
