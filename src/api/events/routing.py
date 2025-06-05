@@ -33,7 +33,12 @@ def get_event(event_id:int,session:Session=Depends(get_session)):
 #Efficient way of adding a data to teh database
 def create_event(payload:EventCreateSchema,session: Session=Depends(get_session)):
     # print(type(payload.page)) payload->dict->pydantic
-    obj=EventModel.model_validate(payload) #instance of that model OR row of that class
+    obj=EventModel(
+        page=payload.page,
+        description=payload.description,
+        updated_at=get_utc_now(),
+        time=get_utc_now()
+    ) #instance of that model OR row of that class
 
     session.add(obj)
     session.commit()# actually adding to the db

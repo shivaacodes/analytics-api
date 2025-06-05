@@ -3,6 +3,7 @@ from typing import List, Optional
 from sqlmodel import SQLModel,Field
 from timescaledb import TimescaleModel
 from timescaledb.utils import get_utc_now
+from sqlalchemy import Sequence, Column, Integer
 
 # def get_utc_now():
 #     return datetime.now(timezone.utc).replace(tzinfo=timezone.utc)
@@ -11,21 +12,22 @@ from timescaledb.utils import get_utc_now
 
 #Database itself
 class EventModel(TimescaleModel,table=True):
-    id: Optional[int]=Field(default=None,primary_key=True)
-
+    id: Optional[int] = Field(
+        default=None,
+        primary_key=True
+    )
+    updated_at:datetime =Field(
+        default_factory=get_utc_now,
+        primary_key=True
+        )
+    time: datetime = Field(default_factory=get_utc_now)
     page:str=Field(index=True) # /about, /pricing , /contact page etc
-    description:Optional[str]=Field(default=None)
+    description:Optional[str]=None
 
     # created_at:datetime =Field(
     #     default_factory=get_utc_now,
     #     nullable=False
     #     )
-
-    updated_at:datetime =Field(
-        default_factory=get_utc_now,
-        nullable=False,
-        primary_key=True
-        )
     
     __chunk_time_interval__="INTERVAL 1 day"
     __drop_after__="INTERVAL 1 month"
