@@ -3,7 +3,7 @@ from typing import List, Optional
 from sqlmodel import SQLModel,Field
 from timescaledb import TimescaleModel
 from timescaledb.utils import get_utc_now
-from sqlalchemy import Sequence, Column, Integer
+from sqlalchemy import Text, Column
 
 # def get_utc_now():
 #     return datetime.now(timezone.utc).replace(tzinfo=timezone.utc)
@@ -12,17 +12,17 @@ from sqlalchemy import Sequence, Column, Integer
 
 #Database itself
 class EventModel(TimescaleModel,table=True):
-    id: Optional[int] = Field(
-        default=None,
-        primary_key=True
-    )
+    # id: Optional[int] = Field(
+    #     default=None,
+    #     primary_key=True
+    # )
     updated_at:datetime =Field(
         default_factory=get_utc_now,
         primary_key=True
         )
     time: datetime = Field(default_factory=get_utc_now)
     page:str=Field(index=True) # /about, /pricing , /contact page etc
-    description:Optional[str]=None
+    description:Optional[str] = Field(default=None, sa_column=Column(Text))
 
     # created_at:datetime =Field(
     #     default_factory=get_utc_now,
