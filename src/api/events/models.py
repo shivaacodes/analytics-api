@@ -60,4 +60,5 @@ class EventCreateSchema(SQLModel):
 class EventBucketSchema(SQLModel):
     bucket:datetime
     page:str
+    ua:Optional[str]=""
     count:int

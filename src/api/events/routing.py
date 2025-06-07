@@ -11,7 +11,7 @@ from .models import (
 )
 from api.db.session import engine
 from timescaledb.hyperfunctions import time_bucket
-from sqlalchemy import func
+from sqlalchemy import case,func
 
 router = APIRouter()
 
@@ -28,20 +28,32 @@ def read_events(
     pages: List[str] = Query(default=None),
     session: Session = Depends(get_session)
 ):
+    from sqlalchemy import String
+    os_case = case(
+        (func.lower(EventModel.user_agent).like('%windows%'), 'Windows'),
+        (func.lower(EventModel.user_agent).like('%macintosh%'), 'MacOS'),
+        (func.lower(EventModel.user_agent).like('%iphone%'), 'iOS'),
+        (func.lower(EventModel.user_agent).like('%android%'), 'Android'),
+        (func.lower(EventModel.user_agent).like('%linux%'), 'Linux'),
+        else_='Other'
+    ).label('operating_system')
+    
     bucket = time_bucket("1 minute", EventModel.time)
     lookup_pages = pages if isinstance(pages, list) and len(pages) > 0 else DEFAULT_LOOKUP_PAGES
 
     query = (
         select(
             bucket.label('bucket'),
-            EventModel.page,
+            os_case,
+            EventModel.page.label('page'), # type: ignore
             func.count().label('count')
         )
         .where(
             EventModel.page.in_(lookup_pages)  # type: ignore
         )
-        .group_by(bucket, EventModel.page)
-        .order_by(bucket, EventModel.page)
+        .group_by(*[col for col in [bucket,os_case, EventModel.page] if col is not None])
+        
+        .order_by(*[col for col in [bucket,os_case, EventModel.page] if col is not None])
     )
     results = session.exec(query).fetchall()
     return results
@@ -58,7 +70,6 @@ def get_event(event_id: int, session: Session = Depends(get_session)):
 
 
 #Create a New Event : POST /api/events
-#Efficient way of adding a data to teh database
 @router.post("/", response_model=EventModel)
 def create_event(payload: EventCreateSchema, session: Session = Depends(get_session)):
     # print(type(payload.page)) payload->dict->pydantic
