@@ -61,4 +61,6 @@ class EventBucketSchema(SQLModel):
     bucket:datetime
     page:str
     ua:Optional[str]=""
+    operating_system:Optional[str]=""
+    duration: Optional[str] = Field(default=0)
     count:int

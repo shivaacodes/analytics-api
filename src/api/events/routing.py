@@ -46,6 +46,7 @@ def read_events(
             bucket.label('bucket'),
             os_case,
             EventModel.page.label('page'), # type: ignore
+            func.avg(EventModel.duration).label('avg_duration'),
             func.count().label('count')
         )
         .where(
