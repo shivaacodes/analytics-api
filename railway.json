@@ -1,0 +1,19 @@
+{
+    "build": {
+        "builder": "DOCKERFILE",
+        "dockerfilePath": "./Dockerfile.web",
+        "watchPatterns": [
+            "requirements.txt",
+            "src/**",
+            "railway.json",
+            "Dockerfile.web"
+        ]
+    },
+    "deploy": {
+      "healthcheckPath": "/healthz",
+      "healthcheckTimeout": 300,
+      "startupTimeout": 300,
+      "restartPolicyType": "always",
+      "restartPolicyMaxRetries": 10
+    }
+}
