@@ -21,7 +21,7 @@ services:
       - PYTHONPATH=/code
     develop:
       watch:
-        - path: Dockerfile
+        - path: Dockerfile.web
           action: rebuild
         - path: requirements.txt
           action: rebuild
